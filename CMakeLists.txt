@@ -21,4 +21,6 @@ add_executable(sem_1 main.cpp
         commands/entity_commands.cpp
         commands/entity_commands.h
         commands/transform_commands.cpp
-        commands/transform_commands.h)
+        commands/transform_commands.h
+        utils/renderer.cpp
+        utils/renderer.h)

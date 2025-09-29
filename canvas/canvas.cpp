@@ -26,5 +26,18 @@ void Canvas::addEntity(std::unique_ptr<Entity> entity) {
     entities.push_back(std::move(entity));
 }
 
+int Canvas::getWidth() const {
+    return width;
+}
+
+int Canvas::getHeight() const {
+    return height;
+}
+
+const std::vector<std::unique_ptr<Entity>>& Canvas::getEntities() const {
+    return entities;
+}
+
+
 
 

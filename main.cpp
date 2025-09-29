@@ -1,6 +1,9 @@
 #include <iostream>
 
 #include "utils/args_parser.h"
+#include "canvas/canvas.h"
+#include "parser/parser.h"
+#include "utils/renderer.h"
 
 int main(int argc, const char** argv) {
     /* sanity check */
@@ -29,6 +32,20 @@ int main(int argc, const char** argv) {
         return 4;
     }
 
+    Canvas canvas(width, height);
+    Parser parser(inputFile);
+
+    if (!parser.parseFile()) {
+        std::cout << "Failed to parse file: " << inputFile << std::endl;
+        return 5;
+    }
+
+    auto& commands = parser.getCommands();
+    for (auto& cmd : commands) {
+        cmd->execute(canvas);
+    }
+
+    Renderer::SVGRender(canvas, outputFile);
 
     /*  exit codes:
      *  0 - success
@@ -39,7 +56,7 @@ int main(int argc, const char** argv) {
      *  5 - invalid commands in input file
      *  6 - unexpected error
      */
-
     std::cout << "OK" << std::endl;
+    std::cout << parser.getCommandsCount() << std::endl;
     return 0;
 }

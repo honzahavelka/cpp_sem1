@@ -1,5 +1,7 @@
 #include "rect.h"
+#include "line.h"
 
+#include <sstream>
 
 Rect::Rect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
     points.reserve(4);
@@ -26,8 +28,8 @@ void Rect::rotate(float cx, float cy, float angle) {
         float xShift = x - cx;
         float yShift = y - cy;
 
-        float newX = xShift * cosA - yShift * sinA;
-        float newY = xShift * sinA + yShift * cosA;
+        float newX = xShift * cosA - yShift * sinA + cx;
+        float newY = xShift * sinA + yShift * cosA + cy;
 
         x = newX;
         y = newY;
@@ -48,4 +50,20 @@ void Rect::scale(float cx, float cy, float factor) {
     for (auto& p : points) {
         scalePoint(p.x, p.y);
     }
+}
+
+std::string Rect::toSvg() {
+    std::vector<Line> edges;
+
+    edges.emplace_back(points[0].x, points[0].y, points[1].x, points[1].y);
+    edges.emplace_back(points[1].x, points[1].y, points[3].x, points[3].y);
+    edges.emplace_back(points[3].x, points[3].y, points[2].x, points[2].y);
+    edges.emplace_back(points[2].x, points[2].y, points[0].x, points[0].y);
+
+
+    std::ostringstream oss;
+    for (auto& line : edges) {
+        oss << line.toSvg() << "\n";
+    }
+    return oss.str();
 }

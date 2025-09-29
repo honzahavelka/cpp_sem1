@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "line.h"
+#include <sstream>
 
 Line::Line(float x1, float y1, float x2, float y2) {
     p1 = Point{x1, y1};
@@ -24,8 +25,8 @@ void Line::rotate(float cx, float cy, float angle) {
         float xShift = x - cx;
         float yShift = y - cy;
 
-        float newX = xShift * cosA - yShift * sinA;
-        float newY = xShift * sinA + yShift * cosA;
+        float newX = xShift * cosA - yShift * sinA + cx;
+        float newY = xShift * sinA + yShift * cosA + cy;
 
         x = newX;
         y = newY;
@@ -46,3 +47,13 @@ void Line::scale(float cx, float cy, float factor) {
     scalePoint(p2.x, p2.y);
 }
 
+std::string Line::toSvg() {
+    std::ostringstream oss;
+    oss << "<line "
+        << "x1=\"" << p1.x << "\" "
+        << "y1=\"" << p1.y << "\" "
+        << "x2=\"" << p2.x << "\" "
+        << "y2=\"" << p2.y << "\" "
+        << "stroke=\"black\" stroke-width=\"2\" />";
+    return oss.str();
+}

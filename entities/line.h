@@ -10,6 +10,8 @@ public:
     void rotate(float cx, float cy, float angle) override;
     void scale(float cx, float cy, float factor) override;
 
+    std::string toSvg() override;
+
 private:
     Point p1, p2;
 };

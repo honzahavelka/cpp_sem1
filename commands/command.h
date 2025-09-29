@@ -6,7 +6,7 @@
 class Command {
 public:
     virtual ~Command() = default;
-    virtual void execute(Canvas& canvas);
+    virtual void execute(Canvas& canvas) = 0;
 };
 
 #endif
