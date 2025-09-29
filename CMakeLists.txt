@@ -12,4 +12,13 @@ add_executable(sem_1 main.cpp
         entities/rect.cpp
         entities/rect.h
         entities/circle.cpp
-        entities/circle.h)
+        entities/circle.h
+        canvas/canvas.cpp
+        canvas/canvas.h
+        parser/parser.cpp
+        parser/parser.h
+        commands/command.h
+        commands/entity_commands.cpp
+        commands/entity_commands.h
+        commands/transform_commands.cpp
+        commands/transform_commands.h)
