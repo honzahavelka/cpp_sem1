@@ -3,4 +3,6 @@ project(sem_1)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(sem_1 main.cpp)
+add_executable(sem_1 main.cpp
+        args_parser.cpp
+        args_parser.h)
