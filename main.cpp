@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "args_parser.h"
+#include "utils/args_parser.h"
 
 int main(int argc, const char** argv) {
     /* sanity check */
@@ -13,11 +13,14 @@ int main(int argc, const char** argv) {
         printInvInputFile();
         return 2;
     }
+    std::string inputFile = argv[1];
+
     /* check output file */
     if (!validOutputFile(argv[2])) {
         printInvOutputFile();
         return 3;
     }
+    std::string outputFile = argv[2];
 
     /* check canvas */
     int width, height;
@@ -25,9 +28,6 @@ int main(int argc, const char** argv) {
         printInvCanvas();
         return 4;
     }
-
-
-
 
 
     /*  exit codes:
@@ -40,5 +40,6 @@ int main(int argc, const char** argv) {
      *  6 - unexpected error
      */
 
+    std::cout << "OK" << std::endl;
     return 0;
 }
