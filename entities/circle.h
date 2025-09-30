@@ -11,6 +11,7 @@ public:
     void scale(float cx, float cy, float factor) override;
 
     std::string toSvg() override;
+    void toPgm(std::vector<std::vector<int>>& pixels) override;
 
 private:
     Point center{};

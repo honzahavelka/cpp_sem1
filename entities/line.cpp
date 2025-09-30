@@ -57,3 +57,25 @@ std::string Line::toSvg() {
         << "stroke=\"black\" stroke-width=\"2\" />";
     return oss.str();
 }
+
+void Line::toPgm(std::vector<std::vector<int>>& pixels) {
+
+    /* easier version of Bresenham's algorithm, that uses floats */
+    float dx = p2.x - p1.x;
+    float dy = p2.y - p1.y;
+
+    float step = std::max(std::abs(dx), std::abs(dy));
+    if (step != 0) {
+        float stepX = dx / step;
+        float stepY = dy / step;
+
+        for (int i = 0; i <= step; i++) {
+            int xPx = std::round(p1.x + i * stepX);
+            int yPx = std::round(p1.y + i * stepY);
+
+            if (xPx >= 0 && xPx < pixels.size() && yPx >= 0 && yPx < pixels[0].size()) {
+                pixels[yPx][xPx] = 0;
+            }
+        }
+    }
+}

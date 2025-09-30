@@ -29,4 +29,32 @@ void Renderer::SVGRender(const Canvas &canvas, std::string &filename) {
 }
 
 void Renderer::PGMRender(const Canvas &canvas, std::string &filename) {
+    std::ostringstream oss;
+
+    std::vector<std::vector<int>> pixels(
+        canvas.getHeight(),
+        std::vector<int>(canvas.getWidth(), 1)
+    );
+
+    for (const auto& e : canvas.getEntities()) {
+        e->toPgm(pixels);
+    }
+
+    oss << "P2\n";
+    oss << canvas.getWidth() << " " << canvas.getHeight() << "\n";
+    oss << "1" << "\n";
+
+    for (int y = 0; y < pixels.size(); y++) {
+        for (int x = 0; x < pixels[0].size(); x++) {
+            oss << pixels[y][x] << " ";
+        }
+        oss << "\n";
+    }
+
+    std::ofstream out(filename);
+    if (!out) {
+        std::cerr << "Error: can't open file " << filename << "\n";
+        return;
+    }
+    out << oss.str();
 }

@@ -40,3 +40,37 @@ std::string Circle::toSvg() {
         << "fill=\"none\" />";
     return oss.str();
 }
+
+void Circle::toPgm(std::vector<std::vector<int>>& pixels) {
+
+    /* top of circle */
+    float x = 0;
+    float y = -radius;
+
+    auto draw = [&](float py, float px) {
+        int xr = std::round(px);
+        int yr = std::round(py);
+        if (yr >= 0 && yr < pixels.size() &&
+            xr >= 0 && xr < pixels[0].size()) {
+            pixels[yr][xr] = 0;
+        }
+    };
+
+    /* iterate through 1/8 of the circle to the right */
+    while (x < -y) {
+        float yMid = y + 0.5f;
+        if (x*x + yMid*yMid > radius*radius) {
+            y+=1;
+        }
+        draw(center.y + y, center.x + x);
+        draw(center.y + y, center.x - x);
+        draw(center.y - y, center.x + x);
+        draw(center.y - y, center.x - x);
+        draw(center.y + x, center.x + y);
+        draw(center.y + x, center.x - y);
+        draw(center.y - x, center.x + y);
+        draw(center.y - x, center.x - y);
+
+        x += 1;
+    }
+}

@@ -67,3 +67,16 @@ std::string Rect::toSvg() {
     }
     return oss.str();
 }
+
+void Rect::toPgm(std::vector<std::vector<int>>& pixels) {
+    std::vector<Line> edges;
+
+    edges.emplace_back(points[0].x, points[0].y, points[1].x, points[1].y);
+    edges.emplace_back(points[1].x, points[1].y, points[3].x, points[3].y);
+    edges.emplace_back(points[3].x, points[3].y, points[2].x, points[2].y);
+    edges.emplace_back(points[2].x, points[2].y, points[0].x, points[0].y);
+
+    for (auto& line : edges) {
+        line.toPgm(pixels);
+    }
+}

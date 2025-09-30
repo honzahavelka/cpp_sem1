@@ -2,6 +2,8 @@
 #define LINE_H
 #include "entity.h"
 
+#include <vector>
+
 class Line : public Entity {
 public:
     Line(float x1, float y1, float x2, float y2);
@@ -11,6 +13,7 @@ public:
     void scale(float cx, float cy, float factor) override;
 
     std::string toSvg() override;
+    void toPgm(std::vector<std::vector<int>>& pixels) override;
 
 private:
     Point p1, p2;

@@ -45,7 +45,8 @@ int main(int argc, const char** argv) {
         cmd->execute(canvas);
     }
 
-    Renderer::SVGRender(canvas, outputFile);
+    //Renderer::SVGRender(canvas, outputFile);
+    Renderer::PGMRender(canvas, outputFile);
 
     /*  exit codes:
      *  0 - success

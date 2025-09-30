@@ -2,6 +2,7 @@
 #define ENTITY_H
 
 #include <string>
+#include <vector>
 
 struct Point {
     float x, y;
@@ -15,6 +16,7 @@ public:
     virtual void scale(float cx, float cy, float factor) = 0;
 
     virtual std::string toSvg() = 0;
+    virtual void toPgm(std::vector<std::vector<int>>& pixels) = 0;
 };
 
 
