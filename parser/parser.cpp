@@ -55,80 +55,242 @@ bool Parser::parseFile() {
             commands.push_back(std::move(cmd));
         }
         else {
-            std::cout << "On line number " << lineNumber << "." << std::endl;
+            std::cout << "Line number " << lineNumber << "." << std::endl;
             return false;
         }
     }
     return true;
 }
 
+void skipWhiteSpaces(std::string& line, int& i) {
+    for (; i < line.size(); i++) {
+        if (line[i] == ' ') {
+            continue;
+        }
+        break;
+    }
+}
+
+std::string loadToken(std::string& line, int& i) {
+    std::string token;
+    for (; i < line.size(); i++) {
+        if (line[i] == ' ') {
+            break;
+        }
+        token += line[i];
+    }
+    return token;
+}
+
 std::unique_ptr<Command> Parser::parseLine(std::string& line) {
-    std::istringstream inputss(line);
-
     std::string keyword;
-    inputss >> keyword;
+    std::vector<std::string> tokens;
 
+    int i;
+    for (i = 0; i < line.size(); i++) {
+        if (line[i] == ' ') {
+            continue;
+        }
+        break;
+    }
+    for (; i < line.size(); i++) {
+        if (line[i] == ' ') {
+            break;
+        }
+        keyword += line[i];
+    }
+
+    /* LINE */
     if (keyword == "line") {
-        int x1, y1, x2, y2;
-        if (!(inputss >> x1 >> y1 >> x2 >> y2))
+        while (i < line.size()) {
+            skipWhiteSpaces(line, i);
+            if (i < line.size()) {
+                tokens.push_back(loadToken(line, i));
+            }
+        }
+        if (tokens.size() != 4) {
+            std::cout << "Error: wrong number of tokens: " << line << std::endl;
             return nullptr;
+        }
+        int x1, y1, x2, y2;
+        try {
+            size_t idx;
+            x1 = std::stoi(tokens[0], &idx);
+            if (idx != tokens[0].size()) throw std::invalid_argument("extra");
+            y1 = std::stoi(tokens[1], &idx);
+            if (idx != tokens[1].size()) throw std::invalid_argument("extra");
+            x2 = std::stoi(tokens[2], &idx);
+            if (idx != tokens[2].size()) throw std::invalid_argument("extra");
+            y2 = std::stoi(tokens[3], &idx);
+            if (idx != tokens[3].size()) throw std::invalid_argument("extra");
 
+        } catch (const std::invalid_argument& e) {
+            std::cout << "Error: wrong data types: " << line << std::endl;
+            return nullptr;
+        }
         if (x1 == x2 && y1 == y2) {
-            std::cout << "Error: can't parse line " << line << std::endl;
+            std::cout << "Error: entity line cant start and end at the same point: " << line << std::endl;
             return nullptr;
         }
         return std::make_unique<LineCommand>(x1, y1, x2, y2);
     }
-    if (keyword == "rect") {
-        int x1, y1;
-        float w, h;
-        if (!(inputss >> x1 >> y1 >> w >> h))
-            return nullptr;
 
-        if (w <= 0 || h <= 0) {
-            std::cout << "Error: can't parse line " << line << std::endl;
+    /* RECT */
+    if (keyword == "rect") {
+        while (i < line.size()) {
+            skipWhiteSpaces(line, i);
+            if (i < line.size()) {
+                tokens.push_back(loadToken(line, i));
+            }
+        }
+        if (tokens.size() != 4) {
+            std::cout << "Error: wrong number of tokens: " << line << std::endl;
             return nullptr;
         }
-        return std::make_unique<RectCommand>(x1, y1, w, h);
+        int x, y, w, h;
+        try {
+            size_t idx;
+            x = std::stoi(tokens[0], &idx);
+            if (idx != tokens[0].size()) throw std::invalid_argument("extra");
+            y = std::stoi(tokens[1]);
+            if (idx != tokens[1].size()) throw std::invalid_argument("extra");
+            w = std::stoi(tokens[2]);
+            if (idx != tokens[2].size()) throw std::invalid_argument("extra");
+            h = std::stoi(tokens[3]);
+            if (idx != tokens[3].size()) throw std::invalid_argument("extra");
+
+        } catch (const std::invalid_argument& e) {
+            std::cout << "Error: wrong data types: " << line << std::endl;
+            return nullptr;
+        }
+        if (w <= 0 || h <= 0) {
+            std::cout << "Error: width and height must be greater than 0. " << line << std::endl;
+            return nullptr;
+        }
+        return std::make_unique<RectCommand>(x, y, w, h);
     }
+
+    /* CIRCLE */
     if (keyword == "circle") {
+        while (i < line.size()) {
+            skipWhiteSpaces(line, i);
+            if (i < line.size()) {
+                tokens.push_back(loadToken(line, i));
+            }
+        }
+        if (tokens.size() != 3) {
+            std::cout << "Error: wrong number of tokens: " << line << std::endl;
+            return nullptr;
+        }
         int x, y;
         float r;
-        if (!(inputss >> x >> y >> r))
+        try {
+            size_t idx;
+            x = std::stoi(tokens[0], &idx);
+            if (idx != tokens[0].size()) throw std::invalid_argument("extra");
+            y = std::stoi(tokens[1], &idx);
+            if (idx != tokens[1].size()) throw std::invalid_argument("extra");
+            r = std::stof(tokens[2]);
+        } catch (const std::invalid_argument& e) {
+            std::cout << "Error: wrong data types: " << line << std::endl;
             return nullptr;
-
+        }
         if (r <= 0) {
-            std::cout << "Error: can't parse line " << line << std::endl;
+            std::cout << "Error: radius must be greater than 0." << line << std::endl;
             return nullptr;
         }
         return std::make_unique<CircleCommand>(x, y, r);
     }
-    if (keyword == "translate") {
-        int dx, dy;
-        if (!(inputss >> dx >> dy))
-            return nullptr;
-        return std::make_unique<TranslateCommand>(dx, dy);
-    }
-    if (keyword == "scale") {
-        int cx, cy;
-        float factor;
-        if (!(inputss >> cx >> cy >> factor))
-            return nullptr;
 
-        if (factor == 0) {
-            std::cout << "Error: can't parse line " << line << std::endl;
+    /* TRANSLATE */
+    if (keyword == "translate") {
+        while (i < line.size()) {
+            skipWhiteSpaces(line, i);
+            if (i < line.size()) {
+                tokens.push_back(loadToken(line, i));
+            }
+        }
+        if (tokens.size() != 2) {
+            std::cout << "Error: wrong number of tokens: " << line << std::endl;
             return nullptr;
         }
-        return std::make_unique<ScaleCommand>(cx, cy, factor);
-    }
-    if (keyword == "rotate") {
-        int cx, cy;
-        float angle;
-        if (!(inputss >> cx >> cy >> angle))
+        int dx, dy;
+        try {
+            size_t idx;
+            dx = std::stoi(tokens[0], &idx);
+            if (idx != tokens[0].size()) throw std::invalid_argument("extra");
+            dy = std::stoi(tokens[1]);
+            if (idx != tokens[1].size()) throw std::invalid_argument("extra");
+        } catch (const std::invalid_argument& e) {
+            std::cout << "Error: wrong data types: " << line << std::endl;
             return nullptr;
-        return std::make_unique<RotateCommand>(cx, cy, angle);
+        }
+        return std::make_unique<TranslateCommand>(dx, dy);
     }
 
-    std::cout << "Error: can't parse line " << line << std::endl;
+    /* SCALE */
+    if (keyword == "scale") {
+        while (i < line.size()) {
+            skipWhiteSpaces(line, i);
+            if (i < line.size()) {
+                tokens.push_back(loadToken(line, i));
+            }
+        }
+        if (tokens.size() != 3) {
+            std::cout << "Error: wrong number of tokens: " << line << std::endl;
+            return nullptr;
+        }
+        int x, y;
+        float factor;
+        try {
+            size_t idx;
+            x = std::stoi(tokens[0], &idx);
+            if (idx != tokens[0].size()) throw std::invalid_argument("extra");
+            y = std::stoi(tokens[1], &idx);
+            if (idx != tokens[1].size()) throw std::invalid_argument("extra");
+            factor = std::stof(tokens[2]);
+        } catch (const std::invalid_argument& e) {
+            std::cout << "Error: wrong data types: " << line << std::endl;
+            return nullptr;
+        }
+        if (factor == 0) {
+            std::cout << "Error: factor must be greater than 0." << line << std::endl;
+            return nullptr;
+        }
+
+        return std::make_unique<ScaleCommand>(x, y, factor);
+    }
+
+    /* rotate */
+    if (keyword == "rotate") {
+        while (i < line.size()) {
+            skipWhiteSpaces(line, i);
+            if (i < line.size()) {
+                tokens.push_back(loadToken(line, i));
+            }
+        }
+        if (tokens.size() != 3) {
+            std::cout << "Error: wrong number of tokens: " << line << std::endl;
+            return nullptr;
+        }
+        int x, y;
+        float angle;
+
+        try {
+            size_t idx;
+            x = std::stoi(tokens[0], &idx);
+            if (idx != tokens[0].size()) throw std::invalid_argument("extra");
+            y = std::stoi(tokens[1], &idx);
+            if (idx != tokens[1].size()) throw std::invalid_argument("extra");
+            angle = std::stof(tokens[2]);
+        } catch (const std::invalid_argument& e) {
+            std::cout << "Error: wrong data types: " << line << std::endl;
+            return nullptr;
+        }
+
+        return std::make_unique<RotateCommand>(x, y, angle);
+    }
+
+    std::cout << "Error: invalid keyword: " << keyword << ", " << line << std::endl;
     return nullptr;
 }

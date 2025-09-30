@@ -5,8 +5,8 @@
 
 class Renderer {
 public:
-    static void SVGRender(const Canvas& canvas, std::string& filename);
-    static void PGMRender(const Canvas& canvas, std::string& filename);
+    static bool SVGRender(const Canvas& canvas, std::string& filename);
+    static bool PGMRender(const Canvas& canvas, std::string& filename);
 };
 
 #endif

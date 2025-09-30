@@ -6,7 +6,7 @@
 #include <sstream>
 
 
-void Renderer::SVGRender(const Canvas &canvas, std::string &filename) {
+bool Renderer::SVGRender(const Canvas &canvas, std::string &filename) {
     std::ostringstream oss;
 
     oss << "<svg xmlns=\"http://www.w3.org/2000/svg\" "
@@ -23,12 +23,13 @@ void Renderer::SVGRender(const Canvas &canvas, std::string &filename) {
     std::ofstream outFile(filename);
     if (!outFile) {
         std::cout << "Error: cannot open output file " << filename << "." << std::endl;
-        return;
+        return false;
     }
     outFile << oss.str();
+    return true;
 }
 
-void Renderer::PGMRender(const Canvas &canvas, std::string &filename) {
+bool Renderer::PGMRender(const Canvas &canvas, std::string &filename) {
     std::ostringstream oss;
 
     std::vector<std::vector<int>> pixels(
@@ -54,7 +55,8 @@ void Renderer::PGMRender(const Canvas &canvas, std::string &filename) {
     std::ofstream out(filename);
     if (!out) {
         std::cerr << "Error: can't open file " << filename << "\n";
-        return;
+        return false;
     }
     out << oss.str();
+    return true;
 }
