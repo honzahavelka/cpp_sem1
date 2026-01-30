@@ -46,7 +46,7 @@ void ArgsParser::validateOutputFile(const std::string& path) {
 }
 
 void ArgsParser::checkInvalidChars(const std::string& path, const std::string& context) const {
-    const std::string invalidChars = "/\\:*?\"<>|";
+    const std::string invalidChars = ":*?\"<>|";
     for (const char c : path) {
         if (invalidChars.find(c) != std::string::npos) {
             throw std::runtime_error(context + " obsahuje nepovoleny znak: '" + std::string(1, c) + "'");
