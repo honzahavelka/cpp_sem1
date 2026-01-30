@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 /**
  * @brief Implementace rendereru pro formát PGM.
