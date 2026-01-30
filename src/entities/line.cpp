@@ -16,7 +16,7 @@ void Line::translate(const Point& offset) {
 
 void Line::rotate(const Point& center, const double angle_deg) {
     // převod, protože funkce rotateAround chce radiány
-    const double rad = angle_deg * (M_PI / 180.0);
+    const double rad = angle_deg * (Point::PI / 180.0);
 
     // využití funkce struktury Point
     m_p1 = m_p1.rotateAround(center, rad);

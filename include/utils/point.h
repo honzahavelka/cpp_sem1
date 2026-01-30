@@ -13,6 +13,8 @@ struct Point {
     double x;
     double y;
 
+    static constexpr double PI = 3.14159265358979323846; ///< veřejná constexpr konstanta pro PI
+
     /**
      * @brief Sečte dva body (vektorový součet).
      * Slouží primárně pro translaci (posun) bodu o daný vektor.

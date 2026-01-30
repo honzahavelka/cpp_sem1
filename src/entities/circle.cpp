@@ -11,7 +11,7 @@ void Circle::translate(const Point &offset) {
 }
 
 void Circle::rotate(const Point &center, const double angle_deg) {
-    const double rad = angle_deg * (M_PI / 180.0);
+    const double rad = angle_deg * (Point::PI / 180.0);
 
     // zase se posouvá pouze střed
     m_center = m_center.rotateAround(center, rad);
