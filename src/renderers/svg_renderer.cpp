@@ -31,33 +31,33 @@ void SvgRenderer::drawRect(const Rect& rect) {
     for (const auto& p : rect.getPoints()) {
         pointsAttr += std::to_string(p.x) + "," + std::to_string(p.y) + " ";
     }
-
+    // místo rect používáme polygon, alternativa by byla kreslit 4x Line
     const std::string tag = "<polygon points=\"" + pointsAttr +
                       "\" stroke=\"black\" stroke-width=\"2\" fill=\"none\" />";
     m_buffer.push_back(tag);
 }
 
 
-
-
 void SvgRenderer::save() {
+    // check souboru
     std::ofstream ofs(m_filename);
     if (!ofs.is_open()) {
         throw std::runtime_error("Nelze otevrit soubor pro zapis: " + m_filename);
     }
 
-    // Hlavička SVG
+    // hlavička
     ofs << "<svg version=\"1.1\" width=\"" << m_width << "\" height=\"" << m_height
         << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
 
-    // Bílé pozadí (dle zadání)
+    // pozadí
     ofs << "<rect width=\"100%\" height=\"100%\" fill=\"white\" />\n";
 
-    // Všechny tvary
+    // vyprázdnit buffer
     for (const auto& tag : m_buffer) {
         ofs << "  " << tag << "\n";
     }
 
+    // konec
     ofs << "</svg>";
     ofs.close();
 }

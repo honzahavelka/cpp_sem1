@@ -9,41 +9,52 @@
 PgmRenderer::PgmRenderer(const std::string& filename, const int width, const int height)
     : m_filename(filename), m_width(width), m_height(height)
 {
-    // Inicializace bílou barvou (255)
+    // inicializace pixelového bufferu.
+    // PGM formát používá 8bitovou šedou škálu (0-255).
+    // plátno inicializujeme bílou barvou (255), protože kreslíme černou (0).
+    // vektor používáme jako 1D pole reprezentující 2D mřížku.
     m_pixels.resize(width * height, 255);
 }
 
 void PgmRenderer::putPixel(const int x, const int y, const uint8_t color) {
+    // kontrolujeme, jestli se souřadnice vejdou do vektoru, jestli ne, tak nezapisujeme
+    // color je defaultně nastaven na 0, protože se v projektu jinak nevyužívá
     if (x >= 0 && x < m_width && y >= 0 && y < m_height) {
         m_pixels[y * m_width + x] = color;
     }
 }
 
-void PgmRenderer::drawThickLine(int x0, int y0, const int x1, const int y1) {
 
+void PgmRenderer::drawThickLine(int x0, int y0, const int x1, const int y1) {
+    // rozhodnutí o strmosti čáry.
+    // pokud je rozdíl v Y větší než v X, čára je strmá -> je lepší ji dělat tlustou na ose X
+    // a naopak
     const bool steep = std::abs(y1 - y0) > std::abs(x1 - x0);
 
+    // příprava proměnných pro Bresenhamův algoritmus
     const int dx = std::abs(x1 - x0);
     const int dy = std::abs(y1 - y0);
-    const int sx = (x0 < x1) ? 1 : -1;
-    const int sy = (y0 < y1) ? 1 : -1;
-    int err = dx - dy;
+    const int sx = (x0 < x1) ? 1 : -1;  // směr kroku v ose X
+    const int sy = (y0 < y1) ? 1 : -1;  // směr kroku v ose Y
+    int err = dx - dy;                  // chyba nasčítavájící se v průběhu kreslení
 
     while (true) {
-        // Kreslíme hlavní pixel (černá = 0)
+        // vykreslení hlavního pixelu čáry
         putPixel(x0, y0, 0);
 
-        // --- TADY JE TA MAGIE PRO TLOUŠŤKU 2PX ---
+        // aby čára byla tlustá 2 px, přidáme pixel v kolmém směru na hlavní osu kreslení.
         if (steep) {
-            // Čára je svislá -> ztloustneme ji do šířky (x+1)
+            // čára je svislá -> ztloustneme ji do šířky
             putPixel(x0 + 1, y0, 0);
         } else {
-            // Čára je vodorovná -> ztloustneme ji do výšky (y+1)
+            // čára je vodorovná -> ztloustneme ji do výšky
             putPixel(x0, y0 + 1, 0);
         }
-        // ------------------------------------------
 
+        // konec cyklu, pokud jsme dosáhli koncového bodu
         if (x0 == x1 && y0 == y1) break;
+
+        // výpočet dalšího kroku Bresenhama
         const int e2 = 2 * err;
         if (e2 > -dy) {
             err -= dy;
@@ -57,15 +68,13 @@ void PgmRenderer::drawThickLine(int x0, int y0, const int x1, const int y1) {
 }
 
 void PgmRenderer::drawLine(const Line& line) {
-    // Zadání: tloušťka 2 pixely.
-    // Jednoduchý trik: nakreslíme čáru a pak ji posuneme o 1px vedle.
-    // Pro věrnost by to chtělo složitější logiku, ale pro semestrálku stačí
-    // zdvojit čáru v jedné ose.
-
+    // lambda funkce pro zaokrouhlení souřadnic, vím že to asi není úplně dobré využití
+    // nějak sem ale zadání splnit musel a jinde jsem si taky nebyl jistý
     auto toInt = [](const double val) {
         return static_cast<int>(std::round(val));
     };
 
+    // převedení na int a zavolání pomocné metody
     const int x1 = toInt(line.getP1().x);
     const int y1 = toInt(line.getP1().y);
     const int x2 = toInt(line.getP2().x);
@@ -75,12 +84,14 @@ void PgmRenderer::drawLine(const Line& line) {
 }
 
 void PgmRenderer::drawBresenhamCircle(const int xm, const int ym, const int r) {
+    // Bresenhamův Midpoint algoritmus pro kružnici.
     int x = 0;
     int y = r;
-    int d = 3 - 2 * r;
+    int d = 3 - 2 * r; // rozhodovací parametr
 
     while (y >= x) {
-        // Vykreslení 8 symetrických bodů (oktantů)
+        // využití symetrie kruhu.
+        // stačí spočítat 1/8 kruhu a zbytek získáme zrcadlením
         putPixel(xm + x, ym + y, 0);
         putPixel(xm - x, ym + y, 0);
         putPixel(xm + x, ym - y, 0);
@@ -91,6 +102,7 @@ void PgmRenderer::drawBresenhamCircle(const int xm, const int ym, const int r) {
         putPixel(xm - y, ym - x, 0);
 
         x++;
+        // aktualizace rozhodovací proměnné
         if (d > 0) {
             y--;
             d = d + 4 * (x - y) + 10;
@@ -106,21 +118,22 @@ void PgmRenderer::drawCircle(const Circle& circle) {
     const int r = static_cast<int>(std::round(circle.getRadius()));
 
     drawBresenhamCircle(xm, ym, r);
+    // pokusíme se udělat tloušťku 2 px
     if (r >= 1) {
         drawBresenhamCircle(xm, ym, r - 1);
     }
 }
 
 void PgmRenderer::drawRect(const Rect& rect) {
-    // Obdélník je jen 4 úsečky
     const auto& pts = rect.getPoints();
 
-    // Kreslíme hrany: 0-1, 1-2, 2-3, 3-0
+    // obdélník vykreslíme jako 4 spojené úsečky.
+    // Procházíme vrcholy: 0->1, 1->2, 2->3, 3->0
     for (size_t i = 0; i < 4; ++i) {
         const int x1 = static_cast<int>(std::round(pts[i].x));
         const int y1 = static_cast<int>(std::round(pts[i].y));
 
-        // Následující bod (modulo zajistí spojení 3->0)
+        // index druhého bodu spočítaný modulem, aby se spojila 3 -> 0
         const int x2 = static_cast<int>(std::round(pts[(i + 1) % 4].x));
         const int y2 = static_cast<int>(std::round(pts[(i + 1) % 4].y));
 
@@ -129,21 +142,27 @@ void PgmRenderer::drawRect(const Rect& rect) {
 }
 
 void PgmRenderer::save() {
-    std::ofstream ofs(m_filename, std::ios::binary);
+    // check souboru
+    std::ofstream ofs(m_filename);
     if (!ofs.is_open()) {
         throw std::runtime_error("Nelze zapsat PGM: " + m_filename);
     }
 
-    // PGM hlavička (P5 = binární, P2 = ASCII)
-    // Zadání odkazuje na specifikaci, P2 je bezpečnější pro ladění, P5 je menší.
-    // Použijeme P2 (ASCII), protože je čitelnější a stačí.
+    // zápis hlavičky PGM formátu, verze P2 = ASCII text
+    // struktura:
+    // P2
+    // sirka vyska
+    // max_hodnota_sede - zde 255
     ofs << "P2\n";
     ofs << m_width << " " << m_height << "\n";
-    ofs << "255\n"; // Max hodnota šedé
+    ofs << "255\n";
 
+    // zápis dat
     for (size_t i = 0; i < m_pixels.size(); ++i) {
+        // static cast protože jinak by stream napsal z uint8_t ASCII char
         ofs << static_cast<int>(m_pixels[i]) << " ";
-        // Pro hezčí formátování odřádkujeme po šířce
+
+        // odřázkování po šířce není nutnost, ale je to hezčí
         if ((i + 1) % m_width == 0) ofs << "\n";
     }
 }
